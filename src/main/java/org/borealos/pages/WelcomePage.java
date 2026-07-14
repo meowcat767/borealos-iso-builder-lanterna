@@ -18,6 +18,16 @@ public class WelcomePage {
         }
     }
 
+    public void exit() {
+        try {
+            terminal.exitPrivateMode();
+            terminal.clearScreen();
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void DispWelcomePage() {
        try {
 
