@@ -26,7 +26,8 @@ public class FileValidationPage {
                         "RootFS is valid.",
                         MessageDialogButton.OK);
                 if (result == MessageDialogButton.OK) {
-
+                    PkgInstPage pkgInstPage = new PkgInstPage(window);
+                    pkgInstPage.show();
                 }
 
             } catch (Exception e) {
