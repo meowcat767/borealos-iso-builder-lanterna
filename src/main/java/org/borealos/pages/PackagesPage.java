@@ -11,6 +11,7 @@ public class PackagesPage {
     private final Button detectButton = new Button("Detect", new Runnable() {
         @Override
         public void run() {
+            window.setTitle("Local Package Manager");
             try {
                 WindowBasedTextGUI textGUI = window.getTextGUI();
                 String manager = org.borealos.subsys.PackageManagerDetector.getPackageManager();

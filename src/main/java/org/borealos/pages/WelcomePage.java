@@ -12,7 +12,6 @@ import java.util.Arrays;
 
 public class WelcomePage {
 
-
     private Terminal terminal = null;
     private Screen screen = null;
     private TextGraphics graphics = null;
