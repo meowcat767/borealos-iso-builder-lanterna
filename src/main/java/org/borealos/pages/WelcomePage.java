@@ -12,14 +12,16 @@ import java.util.Arrays;
 
 public class WelcomePage {
 
-    public Terminal terminal = null;
-    public Screen screen = null;
-    public TextGraphics graphics = null;
+
+    private Terminal terminal = null;
+    private Screen screen = null;
+    private TextGraphics graphics = null;
 
     private BasicWindow window = null;
     private MultiWindowTextGUI gui = null;
     private Panel panel = null;
     private Button button = null;
+    private Button exitButton = null;
 
     public void init() {
         DefaultTerminalFactory terminalFactory = new DefaultTerminalFactory();
@@ -33,9 +35,17 @@ public class WelcomePage {
             this.button = new Button("Continue", new Runnable() {
                 @Override
                 public void run() {
-
+                    PackagesPage packagesPage = new PackagesPage();
+                    packagesPage.init();
                 }
             });
+            this.exitButton = new Button("Exit", new Runnable() {
+                @Override
+                public void run() {
+                    exit();
+                }
+            });
+
 
             screen.startScreen();
             screen.setCursorPosition(null);
@@ -71,6 +81,7 @@ public class WelcomePage {
            panel.addComponent(new Label(""));
            panel.addComponent(new Label("Press any key to continue..."));
            panel.addComponent(button);
+           panel.addComponent(exitButton);
 
            window.setComponent(panel);
            gui.addWindowAndWait(window);
