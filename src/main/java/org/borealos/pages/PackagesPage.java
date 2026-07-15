@@ -2,6 +2,7 @@ package org.borealos.pages;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 
 public class PackagesPage {
 
@@ -15,10 +16,17 @@ public class PackagesPage {
             try {
                 WindowBasedTextGUI textGUI = window.getTextGUI();
                 String manager = org.borealos.subsys.PackageManagerDetector.getPackageManager();
-                MessageDialog.showMessageDialog(
+                MessageDialogButton result = MessageDialog.showMessageDialog(
                         textGUI,
                         "Package Manager",
-                        manager != null ? "Detected: " + manager : "No supported package manager found.");
+                        manager != null ? "Detected: " + manager : "No supported package manager found.",
+                        MessageDialogButton.OK);
+
+                if (result == MessageDialogButton.OK) {
+                    // Dialog dismissed via OK -> swap this window's content to the next page.
+                    FileValidationPage fileValidationPage = new FileValidationPage(window);
+                    fileValidationPage.show();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
