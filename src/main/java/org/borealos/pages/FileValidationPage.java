@@ -2,6 +2,7 @@ package org.borealos.pages;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +19,16 @@ public class FileValidationPage {
                 if (!Files.exists(Paths.get("borealOS-rootfs.tar.gz"))){
                     throw new IOException("File not found");
                 }
-                MessageDialog.showMessageDialog(window.getTextGUI(), "Success!", "RootFS is valid.");
+
+                MessageDialogButton result = MessageDialog.showMessageDialog(
+                        window.getTextGUI(),
+                        "RootFS Valid",
+                        "RootFS is valid.",
+                        MessageDialogButton.OK);
+                if (result == MessageDialogButton.OK) {
+
+                }
+
             } catch (Exception e) {
                 MessageDialog.showMessageDialog(window.getTextGUI(), "Error!", e.getMessage());
             }

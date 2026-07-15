@@ -16,11 +16,15 @@ public class PackagesPage {
             try {
                 WindowBasedTextGUI textGUI = window.getTextGUI();
                 String manager = org.borealos.subsys.PackageManagerDetector.getPackageManager();
+                if (manager == "apk") {
+                    MessageDialog.showMessageDialog(textGUI, "Package Manager", "You will need to add the community repo in /etc/apk/repositories.", MessageDialogButton.OK);
+                }
                 MessageDialogButton result = MessageDialog.showMessageDialog(
                         textGUI,
                         "Package Manager",
                         manager != null ? "Detected: " + manager : "No supported package manager found.",
                         MessageDialogButton.OK);
+
 
                 if (result == MessageDialogButton.OK) {
                     // Dialog dismissed via OK -> swap this window's content to the next page.
