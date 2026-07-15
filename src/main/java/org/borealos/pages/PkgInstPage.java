@@ -14,6 +14,8 @@ public class PkgInstPage {
     }
 
     public void show() {
+        window.setTitle("Installing Packages");
+
         panel.addComponent(new Label("Installing base package modules..."));
         panel.addComponent(progressBar);
 

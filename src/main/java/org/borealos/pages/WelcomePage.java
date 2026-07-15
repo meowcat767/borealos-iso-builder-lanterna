@@ -34,8 +34,8 @@ public class WelcomePage {
             this.button = new Button("Continue", new Runnable() {
                 @Override
                 public void run() {
-                    PackagesPage packagesPage = new PackagesPage(window);
-                    packagesPage.show();
+                    RootPasswordPage rootPasswordPage = new RootPasswordPage(window);
+                    rootPasswordPage.show();
                 }
             });
             this.exitButton = new Button("Exit", new Runnable() {

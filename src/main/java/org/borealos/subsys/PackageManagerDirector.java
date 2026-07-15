@@ -17,80 +17,127 @@ public class PackageManagerDirector {
             if ("apt".equals(pm)){
                 worker.submit(() -> {
                     try {
-                        runCommand("apt", "install", "-y", "xorriso");
+                        runCommand("sudo", "apt", "install", "-y", "xorriso");
                         updateUI(gui, progressBar, 20);
 
-                        runCommand("apt", "install", "-y", "imagemagick");
+                        runCommand("sudo", "apt", "install", "-y", "imagemagick");
                         updateUI(gui, progressBar, 40);
 
-                        runCommand("apt", "install", "-y", "grub-efi-amd64-bin", "grub-pc-bin", "mtools");
+                        runCommand("sudo", "apt", "install", "-y", "grub-efi-amd64-bin", "grub-pc-bin", "mtools");
                         updateUI(gui, progressBar, 60);
 
-                        runCommand("apt", "install", "-y", "squashfs-tools");
+                        runCommand("sudo", "apt", "install", "-y", "squashfs-tools");
                         updateUI(gui, progressBar, 80);
 
-                        runCommand("apt", "install", "-y", "unzip");
+                        runCommand("sudo", "apt", "install", "-y", "unzip");
                         updateUI(gui, progressBar, 100);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        updateUIError(gui, e.getMessage());
                     }
                 });
             } else if ("apk".equals(pm)){
                 worker.submit(() -> {
                     try {
-                        runCommand("apk", "add", "xorriso");
+                        runCommand("sudo", "apk", "add", "xorriso");
                          updateUI(gui, progressBar, 10);
-                         runCommand("apk", "add", "imagemagick");
+                         runCommand("sudo", "apk", "add", "imagemagick");
                          updateUI(gui, progressBar, 20);
-                         runCommand("apk", "add", "mtools");
+                         runCommand("sudo", "apk", "add", "mtools");
                          updateUI(gui, progressBar, 40);
-                         runCommand("apk", "add", "squashfs-tools");
+                         runCommand("sudo", "apk", "add", "squashfs-tools");
                          updateUI(gui, progressBar, 50);
-                         runCommand("apk", "add", "unzip");
+                         runCommand("sudo", "apk", "add", "unzip");
                          updateUI(gui, progressBar, 60);
-                         runCommand("apk", "add", "grub-efi");
+                         runCommand("sudo", "apk", "add", "grub-efi");
                          updateUI(gui, progressBar, 80);
-                         runCommand("apk", "add", "grub");
+                         runCommand("sudo", "apk", "add", "grub");
                          updateUI(gui, progressBar, 100);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        updateUIError(gui, e.getMessage());
                     }
                 });
             } else if ("pacman".equals(pm)){
-                try {
-                    runCommand("pacman", "-S", "--noconfirm", "xorriso");
-                    updateUI(gui, progressBar, 10);
-                    runCommand("pacman", "-S", "--noconfirm", "imagemagick");
-                    updateUI(gui, progressBar, 20);
-                    runCommand("pacman", "-S", "--noconfirm", "mtools");
-                    updateUI(gui, progressBar, 30);
-                    runCommand("pacman", "-S", "--noconfirm", "squashfs-tools");
-                    updateUI(gui, progressBar, 40);
-                    runCommand("pacman", "-S", "--noconfirm", "unzip");
-                    updateUI(gui, progressBar,  50);
-                    runCommand("pacman", "-S", "--noconfirm", "grub");
-                    updateUI(gui, progressBar, 100);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-
+                worker.submit(() -> {
+                    try {
+                        runCommand("sudo", "pacman", "-S", "--noconfirm", "xorriso");
+                        updateUI(gui, progressBar, 10);
+                        runCommand("sudo", "pacman", "-S", "--noconfirm", "imagemagick");
+                        updateUI(gui, progressBar, 20);
+                        runCommand("sudo", "pacman", "-S", "--noconfirm", "mtools");
+                        updateUI(gui, progressBar, 30);
+                        runCommand("sudo", "pacman", "-S", "--noconfirm", "squashfs-tools");
+                        updateUI(gui, progressBar, 40);
+                        runCommand("sudo", "pacman", "-S", "--noconfirm", "unzip");
+                        updateUI(gui, progressBar,  50);
+                        runCommand("sudo", "pacman", "-S", "--noconfirm", "grub");
+                        updateUI(gui, progressBar, 100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        updateUIError(gui, e.getMessage());
+                    }
+                });
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void runCommand(String... command) throws Exception {
-        Process process = new ProcessBuilder(command)
-                .redirectErrorStream(true)
-                .start();
+    private static void updateUIError(WindowBasedTextGUI gui, String message) {
+        if (gui != null) {
+            gui.getGUIThread().invokeLater(() -> {
+                com.googlecode.lanterna.gui2.dialogs.MessageDialog.showMessageDialog(gui, "Error", message);
+            });
+        }
+    }
 
-        process.getInputStream().transferTo(java.io.OutputStream.nullOutputStream());
+    private static void runCommand(String... command) throws Exception {
+        // If we are not root and trying to use a package manager, we might need elevation
+        // But since we are in a TUI, sudo will fail if it asks for a password and we don't have a tty.
+        // We now use 'sudo -S' to read the password from stdin.
+
+        String[] finalCommand = command;
+        boolean useSudoS = command.length > 0 && "sudo".equals(command[0]);
+        if (useSudoS) {
+            // Insert -S after sudo
+            String[] newCmd = new String[command.length + 1];
+            newCmd[0] = "sudo";
+            newCmd[1] = "-S";
+            System.arraycopy(command, 1, newCmd, 2, command.length - 1);
+            finalCommand = newCmd;
+        }
+
+        ProcessBuilder pb = new ProcessBuilder(finalCommand)
+                .redirectErrorStream(true);
+        
+        Process process = pb.start();
+
+        if (useSudoS) {
+            String password = org.borealos.pages.RootPasswordPage.getRootPassword();
+            try (java.io.OutputStream os = process.getOutputStream()) {
+                os.write((password + "\n").getBytes());
+                os.flush();
+            }
+        }
+
+        java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()));
+        StringBuilder output = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            output.append(line).append("\n");
+        }
 
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            throw new RuntimeException("Command failed with exit code: " + exitCode);
+            String errorMsg = "Command failed: " + String.join(" ", command) + "\nExit code: " + exitCode + "\nOutput: " + output.toString();
+            System.err.println(errorMsg);
+            
+            if (output.toString().contains("sudo: a password is required") || output.toString().contains("sudo: no tty present") || output.toString().contains("sudo: 1 incorrect password attempt")) {
+                throw new RuntimeException("Privilege escalation failed. Incorrect password or sudo configuration issue.");
+            }
+            
+            throw new RuntimeException("Command failed with exit code: " + exitCode + "\nOutput: " + output.toString());
         }
     }
 

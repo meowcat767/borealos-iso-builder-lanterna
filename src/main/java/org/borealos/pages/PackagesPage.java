@@ -16,7 +16,7 @@ public class PackagesPage {
             try {
                 WindowBasedTextGUI textGUI = window.getTextGUI();
                 String manager = org.borealos.subsys.PackageManagerDetector.getPackageManager();
-                if (manager == "apk") {
+                if ("apk".equals(manager)) {
                     MessageDialog.showMessageDialog(textGUI, "Package Manager", "You will need to add the community repo in /etc/apk/repositories.", MessageDialogButton.OK);
                 }
                 MessageDialogButton result = MessageDialog.showMessageDialog(
