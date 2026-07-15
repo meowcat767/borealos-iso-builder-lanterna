@@ -61,6 +61,7 @@ public class PackageManagerDirector {
             } else if ("pacman".equals(pm)){
                 worker.submit(() -> {
                     try {
+                        runCommand("sudo", "pacman", "-Syy");
                         runCommand("sudo", "pacman", "-S", "--noconfirm", "xorriso");
                         updateUI(gui, progressBar, 10);
                         runCommand("sudo", "pacman", "-S", "--noconfirm", "imagemagick");

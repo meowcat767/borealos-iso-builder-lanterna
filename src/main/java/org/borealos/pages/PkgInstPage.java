@@ -17,6 +17,8 @@ public class PkgInstPage {
         window.setTitle("Installing Packages");
 
         panel.addComponent(new Label("Installing base package modules..."));
+        panel.addComponent(new Label("This may take a while."));
+        panel.addComponent(new Label(""));
         panel.addComponent(progressBar);
 
         window.setComponent(panel);
