@@ -22,7 +22,7 @@ public class PackagesPage {
                 MessageDialogButton result = MessageDialog.showMessageDialog(
                         textGUI,
                         "Package Manager",
-                        manager != null ? "Detected: " + manager : "No supported package manager found.",
+                        manager != null ? "Detected: " + manager : "No supported package manager found. Arch, Alpine, Debian, and Ubuntu are supported.",
                         MessageDialogButton.OK);
 
 

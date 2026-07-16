@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class PackageManagerDetector {
     public static String getPackageManager() throws IOException {
-        String[] managers = {"apt", "pacman", "dnf", "zypper", "yum", "apk"};
+        String[] managers = {"apt", "pacman", "apk"};
         for (String manager : managers) {
             if (isCommandAvailable(manager)){
                 return manager;
