@@ -14,6 +14,13 @@ public class DePage {
         public void run() {
             int PickedDE = comboBox.getSelectedIndex();
 
+            String flag = switch (PickedDE) {
+                case 0 -> "--kde";
+                case 1 -> "--xfce";
+                case 2 -> "--niri";
+                case 3 -> "--tty";
+                default -> "--xfce";
+            };
         }
     });
 
