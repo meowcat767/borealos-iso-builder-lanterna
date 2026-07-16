@@ -32,6 +32,7 @@ public class DePage {
         comboBox.addItem("None (TTY)");
 
         panel.addComponent(comboBox);
+        panel.addComponent(button);
         window.setComponent(panel);
     }
 }
