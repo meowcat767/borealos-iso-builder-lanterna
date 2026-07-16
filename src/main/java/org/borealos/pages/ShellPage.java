@@ -1,6 +1,8 @@
 package org.borealos.pages;
 
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.screen.Screen;
+
 
 public class ShellPage {
     private final BasicWindow window;
@@ -18,7 +20,7 @@ public class ShellPage {
                 default -> "--bash";
             };
 
-            new ShellPage(window).show();
+            new KernelPage(window).show();
         }
     });
 
