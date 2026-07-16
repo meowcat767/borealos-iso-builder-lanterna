@@ -25,5 +25,7 @@ public class PkgInstPage {
 
         WindowBasedTextGUI gui = window.getTextGUI();
         PackageManagerDirector.installPackages(gui, progressBar);
+
+        new DePage(window).show();
     }
 }
