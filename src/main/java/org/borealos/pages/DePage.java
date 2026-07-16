@@ -1,8 +1,7 @@
 package org.borealos.pages;
 
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
+
 
 
 public class DePage {
@@ -14,7 +13,7 @@ public class DePage {
         public void run() {
             int PickedDE = comboBox.getSelectedIndex();
 
-            String flag = switch (PickedDE) {
+            String DeFlag = switch (PickedDE) {
                 case 0 -> "--kde";
                 case 1 -> "--xfce";
                 case 2 -> "--niri";
