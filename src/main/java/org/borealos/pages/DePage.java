@@ -22,6 +22,8 @@ public class DePage {
                 case 3 -> installConfig.setDesktopEnvironment("--tty");
                 default -> installConfig.setDesktopEnvironment("--xfce");
             };
+
+            new KernelPage(window).show();
         }
     });
 

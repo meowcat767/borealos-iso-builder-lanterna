@@ -26,6 +26,7 @@ public class KernelPage {
                 default -> installConfig.setKernelLTS(true);
             }
 
+            new ExecPage(window).show();
         }
     });
 

@@ -8,53 +8,78 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 public class BuildScriptDirector {
-    private static final ExecutorService worker = Executors.newSingleThreadExecutor();
+    private final ExecutorService worker = Executors.newSingleThreadExecutor();
 
-    public static void FireScript(InstallConfig installConfig) {
-        try {
-            worker.submit(() -> {
+    public interface OutputListener {
+        void onLine(String line);
+    }
+
+    public void FireScript(
+            InstallConfig installConfig,
+            OutputListener listener) {
+
+        worker.submit(() -> {
+            try {
+                // If you want to log a starting line to your listener, do it natively in Java:
+                if (listener != null) {
+                    listener.onLine("STARTING BUILD...");
+                }
 
                 List<String> command = new ArrayList<>();
+
+                // ProcessBuilder requires every component of the execution string to be separate items.
+                // We run 'sudo -S' directly which handles our privilege elevation context cleanly.
+                command.add("sudo");
                 command.add("bash");
                 command.add("./build.sh");
-                command.add(installConfig.getDesktopEnvironment());
 
+                // Desktop environment mapping (Ensure it passes the exact argument flag string)
+                String de = installConfig.getDesktopEnvironment();
+                if (de != null && !de.trim().isEmpty()) {
+                    // If your getDesktopEnvironment() returns e.g. "xfce", map it to "--xfce"
+                    if (!de.startsWith("--")) {
+                        command.add("--" + de.toLowerCase());
+                    } else {
+                        command.add(de);
+                    }
+                }
+
+                // Shell settings
                 if (installConfig.isInstallBash()) {
                     command.add("--bash");
                 }
-
                 if (installConfig.isInstallFish()) {
                     command.add("--fish");
                 }
-
                 if (installConfig.isInstallSh()) {
                     command.add("--sh");
                 }
 
+                // Kernel settings (Aligned to match the updated script: --kernel-lts)
                 if (installConfig.isKernelLTS()) {
-                    command.add("--lts");
+                    command.add("--kernel-lts");
+                } else {
+                    command.add("--kernel-cur");
                 }
 
-                try {
-                    runCommand(command.toArray(new String[0]));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                runCommand(listener, command.toArray(new String[0]));
+            } catch (Exception e) {
+                if (listener != null) {
+                    // Prevent explicit "null" text if the root cause exception lacks an explicitly set message string
+                    String msg = (e.getMessage() != null) ? e.getMessage() : e.toString();
+                    listener.onLine("ERROR: " + msg);
                 }
-            });
-        } catch (Exception e) {
-           throw new RuntimeException(e);
-        }
+                e.printStackTrace();
+            }
+        });
     }
 
-    private static void runCommand(String... command) throws Exception {
-        // If we are not root and trying to use a package manager, we might need elevation
-        // But since we are in a TUI, sudo will fail if it asks for a password and we don't have a tty.
-        // We now use 'sudo -S' to read the password from stdin.
-
+    private void runCommand(OutputListener listener, String... command) throws Exception {
         String[] finalCommand = command;
+
         boolean useSudoS = command.length > 0 && "sudo".equals(command[0]);
+
         if (useSudoS) {
             String[] newCmd = new String[command.length + 1];
             newCmd[0] = "sudo";
@@ -70,29 +95,54 @@ public class BuildScriptDirector {
 
         if (useSudoS) {
             String password = org.borealos.pages.RootPasswordPage.getRootPassword();
+
             try (java.io.OutputStream os = process.getOutputStream()) {
                 os.write((password + "\n").getBytes());
                 os.flush();
             }
         }
 
-        java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()));
+        java.io.BufferedReader reader =
+                new java.io.BufferedReader(
+                        new java.io.InputStreamReader(process.getInputStream()));
+
         StringBuilder output = new StringBuilder();
         String line;
+
         while ((line = reader.readLine()) != null) {
             output.append(line).append("\n");
+
+            // Send output to the UI/log listener
+            if (listener != null) {
+                listener.onLine(line);
+            }
         }
 
         int exitCode = process.waitFor();
+
         if (exitCode != 0) {
-            String errorMsg = "Command failed: " + String.join(" ", command) + "\nExit code: " + exitCode + "\nOutput: " + output.toString();
+            String errorMsg =
+                    "Command failed: " + String.join(" ", command)
+                            + "\nExit code: " + exitCode
+                            + "\nOutput: " + output;
+
             System.err.println(errorMsg);
 
-            if (output.toString().contains("sudo: a password is required") || output.toString().contains("sudo: no tty present") || output.toString().contains("sudo: 1 incorrect password attempt")) {
-                throw new RuntimeException("Privilege escalation failed. Incorrect password or sudo configuration issue.");
+            if (output.toString().contains("sudo: a password is required")
+                    || output.toString().contains("sudo: no tty present")
+                    || output.toString().contains("sudo: 1 incorrect password attempt")) {
+
+                throw new RuntimeException(
+                        "Privilege escalation failed. Incorrect password or sudo configuration issue."
+                );
             }
 
-            throw new RuntimeException("Command failed with exit code: " + exitCode + "\nOutput: " + output.toString());
+            throw new RuntimeException(
+                    "Command failed with exit code: "
+                            + exitCode
+                            + "\nOutput: "
+                            + output
+            );
         }
     }
 }
