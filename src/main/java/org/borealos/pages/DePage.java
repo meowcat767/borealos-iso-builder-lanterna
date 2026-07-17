@@ -1,7 +1,7 @@
 package org.borealos.pages;
 
 import com.googlecode.lanterna.gui2.*;
-
+import org.borealos.val.InstallConfig;
 
 
 public class DePage {
@@ -13,12 +13,14 @@ public class DePage {
         public void run() {
             int PickedDE = comboBox.getSelectedIndex();
 
-            String DeFlag = switch (PickedDE) {
-                case 0 -> "--kde";
-                case 1 -> "--xfce";
-                case 2 -> "--niri";
-                case 3 -> "--tty";
-                default -> "--xfce";
+            InstallConfig installConfig = new InstallConfig();
+
+            switch (PickedDE) {
+                case 0 -> installConfig.setDesktopEnvironment("--plasma");
+                case 1 -> installConfig.setDesktopEnvironment("--xfce");
+                case 2 -> installConfig.setDesktopEnvironment("--niri");
+                case 3 -> installConfig.setDesktopEnvironment("--tty");
+                default -> installConfig.setDesktopEnvironment("--xfce");
             };
         }
     });
