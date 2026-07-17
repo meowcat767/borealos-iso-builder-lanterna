@@ -21,23 +21,16 @@ public class BuildScriptDirector {
 
         worker.submit(() -> {
             try {
-                // If you want to log a starting line to your listener, do it natively in Java:
-                if (listener != null) {
-                    listener.onLine("STARTING BUILD...");
-                }
 
                 List<String> command = new ArrayList<>();
 
-                // ProcessBuilder requires every component of the execution string to be separate items.
-                // We run 'sudo -S' directly which handles our privilege elevation context cleanly.
                 command.add("sudo");
                 command.add("bash");
-                command.add("./build.sh");
+                command.add("./build-iso.sh");
 
-                // Desktop environment mapping (Ensure it passes the exact argument flag string)
+                // Map Desktop Environment string to argument flags
                 String de = installConfig.getDesktopEnvironment();
                 if (de != null && !de.trim().isEmpty()) {
-                    // If your getDesktopEnvironment() returns e.g. "xfce", map it to "--xfce"
                     if (!de.startsWith("--")) {
                         command.add("--" + de.toLowerCase());
                     } else {
@@ -45,7 +38,7 @@ public class BuildScriptDirector {
                     }
                 }
 
-                // Shell settings
+                // Add shell option flags
                 if (installConfig.isInstallBash()) {
                     command.add("--bash");
                 }
@@ -56,17 +49,17 @@ public class BuildScriptDirector {
                     command.add("--sh");
                 }
 
-                // Kernel settings (Aligned to match the updated script: --kernel-lts)
+                // Add kernel selection flags
                 if (installConfig.isKernelLTS()) {
                     command.add("--kernel-lts");
                 } else {
                     command.add("--kernel-cur");
                 }
 
+                System.out.println("Running command: " + String.join(" ", command));
                 runCommand(listener, command.toArray(new String[0]));
             } catch (Exception e) {
                 if (listener != null) {
-                    // Prevent explicit "null" text if the root cause exception lacks an explicitly set message string
                     String msg = (e.getMessage() != null) ? e.getMessage() : e.toString();
                     listener.onLine("ERROR: " + msg);
                 }
@@ -112,7 +105,7 @@ public class BuildScriptDirector {
         while ((line = reader.readLine()) != null) {
             output.append(line).append("\n");
 
-            // Send output to the UI/log listener
+            // Send output directly to the UI/log listener
             if (listener != null) {
                 listener.onLine(line);
             }

@@ -7,8 +7,9 @@ import org.borealos.val.InstallConfig;
 public class KernelPage {
     private final BasicWindow window;
     private final Panel panel;
-    private final ComboBox comboBox = new ComboBox<String>();
-    private final InstallConfig installConfig = new InstallConfig();
+    private final ComboBox<String> comboBox = new ComboBox<>();
+    private final InstallConfig installConfig; // FIXED: Keep track of the shared instance
+
     private final Button button = new Button("Continue", new Runnable() {
         @Override
         public void run() {
@@ -16,22 +17,25 @@ public class KernelPage {
 
             if (selectedKernel == -1) {
                 MessageDialog.showMessageDialog(window.getTextGUI(), "Error", "Please select a kernel.");
-                // even though we have default, it isn't the best option incase of a failed return.
+                return; // Stop execution if nothing is selected
             }
 
-
+            // Note: Make sure case 0 and case 1 align properly with your combo box order
             switch (selectedKernel) {
-                case 0 -> installConfig.setKernelLTS(true);
-                case 1 -> installConfig.setKernelStd(true);
-                default -> installConfig.setKernelLTS(true);
+                case 0 -> installConfig.setKernelLTS(false); // Current 7.0x is Std, not LTS
+                case 1 -> installConfig.setKernelLTS(true);  // LTS 6.18
+                default -> installConfig.setKernelLTS(false);
             }
 
-            new ExecPage(window).show();
+            // FIXED: Pass the shared config forward to the final execution page
+            new ExecPage(window, installConfig).show();
         }
     });
 
-    public KernelPage(BasicWindow window) {
+    // FIXED: Accept the single shared InstallConfig in the constructor
+    public KernelPage(BasicWindow window, InstallConfig installConfig) {
         this.window = window;
+        this.installConfig = installConfig;
         this.panel = new Panel();
     }
 

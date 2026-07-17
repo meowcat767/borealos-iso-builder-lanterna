@@ -31,31 +31,34 @@ done
 [ "$EUID" -eq 0 ] || die "Run as root."
 
 
-# Initialize choice variables as empty
-de_choice=""
-kern_choice=""
-sh_choice=""
+# ===========================================================================
+# PARSE ARGUMENTS OR FALLBACK TO INTERACTIVE PROMPTS
+# ===========================================================================
+DE_CHOICE=""
+KERN_CHOICE=""
+SH_CHOICE=""
 
-# Parse command line arguments
+# Parse flags passed from Java ProcessBuilder
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --kde)        de_choice="1" ;;
-        --xfce)       de_choice="2" ;;
-        --niri)       de_choice="3" ;;
-        --no-de)      de_choice="4" ;;
-        --kernel-cur) kern_choice="1" ;;
-        --kernel-lts) kern_choice="2" ;;
-        --bash)       sh_choice="1" ;;
-        --fish)       sh_choice="2" ;;
-        --sh)         sh_choice="3" ;;
-        *)            echo -e "${RED}Unknown argument: $1${RST}"; exit 1 ;;
+        --kde)        DE_CHOICE="1" ;;
+        --xfce)       DE_CHOICE="2" ;;
+        --niri)       DE_CHOICE="3" ;;
+        --no-de)      DE_CHOICE="4" ;;
+
+        --kernel-cur) KERN_CHOICE="1" ;;
+        --kernel-lts) KERN_CHOICE="2" ;;
+
+        --bash)       SH_CHOICE="1" ;;
+        --fish)       SH_CHOICE="2" ;;
+        --sh)         SH_CHOICE="3" ;;
     esac
     shift
 done
 
-echo ""
-# 1. DE/WM Selection Block
-if [ -z "$de_choice" ]; then
+# --- 1. Desktop Environment Selection ---
+if [ -z "$DE_CHOICE" ]; then
+    echo ""
     echo -e "${BLD}Select DE/WM to include in ISO:${RST}"
     echo "  1) KDE Plasma"
     echo "  2) XFCE"
@@ -63,65 +66,65 @@ if [ -z "$de_choice" ]; then
     echo "  4) None (TTY only)"
     while true; do
         echo -ne "${CYN}Choice${RST}: "
-        read -r de_choice
+        read -r de_choice || die "Input stream closed unexpectedly."
         case "$de_choice" in
-            1|2|3|4) break ;;
+            1|2|3|4) DE_CHOICE="$de_choice"; break ;;
             *) echo -e "${RED}Invalid.${RST}" ;;
         esac
     done
 fi
 
-case "$de_choice" in
+case "$DE_CHOICE" in
     1) DE_PKGS="kde-plasma-desktop"; DM_PKGS="sddm"; DE_NAME="KDE Plasma"; DE_START="startplasma-x11" ;;
     2) DE_PKGS="xfce4 xfce4-goodies gvfs gvfs-backends tumbler tumbler-plugins-extra"; DM_PKGS="lightdm lightdm-gtk-greeter"; DE_NAME="XFCE"; DE_START="startxfce4" ;;
     3) DE_PKGS="foot"; DM_PKGS=""; DE_NAME="Niri"; DE_START="niri-session" ;;
     4) DE_PKGS=""; DM_PKGS=""; DE_NAME="None"; DE_START="" ;;
 esac
 
-
-# 2. Kernel Selection Block
-if [ -z "$kern_choice" ]; then
+# --- 2. Kernel Selection ---
+if [ -z "$KERN_CHOICE" ]; then
+    echo ""
     echo -e "${BLD}Select kernel:${RST}"
     echo "  1) linux-image-amd64 from trixie-backports (current, 7.0.x)"
     echo "  2) linux-image-6.18-amd64 from trixie-backports (LTS 6.18.x)"
     while true; do
         echo -ne "${CYN}Choice${RST}: "
-        read -r kern_choice
+        read -r kern_choice || die "Input stream closed unexpectedly."
         case "$kern_choice" in
-            1|2) break ;;
+            1|2) KERN_CHOICE="$kern_choice"; break ;;
             *) echo -e "${RED}Invalid.${RST}" ;;
         esac
     done
 fi
 
-case "$kern_choice" in
+case "$KERN_CHOICE" in
     1) KERNEL_PKG="linux-image-amd64"; KERNEL_NAME="7.0 current (trixie-backports)" ;;
     2) KERNEL_PKG="linux-image-6.18-amd64"; KERNEL_NAME="6.18 LTS (trixie-backports)" ;;
 esac
 
-
-# 3. Shell Selection Block
-if [ -z "$sh_choice" ]; then
+# --- 3. Shell Selection ---
+if [ -z "$SH_CHOICE" ]; then
+    echo ""
     echo -e "${BLD}Select shell to include:${RST}"
     echo "  1) bash"
     echo "  2) fish"
     echo "  3) sh (already present)"
     while true; do
         echo -ne "${CYN}Choice${RST}: "
-        read -r sh_choice
+        read -r sh_choice || die "Input stream closed unexpectedly."
         case "$sh_choice" in
-            1|2|3) break ;;
+            1|2|3) SH_CHOICE="$sh_choice"; break ;;
             *) echo -e "${RED}Invalid.${RST}" ;;
         esac
     done
 fi
 
-case "$sh_choice" in
+case "$SH_CHOICE" in
     1) SHELL_PKG="bash"; SHELL_BIN="/bin/bash"; SHELL_NAME="bash" ;;
     2) SHELL_PKG="fish"; SHELL_BIN="/usr/bin/fish"; SHELL_NAME="fish" ;;
     3) SHELL_PKG=""; SHELL_BIN="/bin/sh"; SHELL_NAME="sh" ;;
 esac
-
+# ===========================================================================
 echo ""
 echo -e "${BLD}Building ISO: DE=${DE_NAME}, Kernel=${KERNEL_NAME}, Shell=${SHELL_NAME}${RST}"
 echo ""

@@ -3,32 +3,34 @@ package org.borealos.pages;
 import com.googlecode.lanterna.gui2.*;
 import org.borealos.val.InstallConfig;
 
-
 public class DePage {
     private final BasicWindow window;
     private final Panel panel;
-    private final ComboBox comboBox = new ComboBox<String>();
-    private final InstallConfig installConfig = new InstallConfig();
+    private final ComboBox<String> comboBox = new ComboBox<>();
+    private final InstallConfig installConfig; // No instantiation here!
+
     private final Button button = new Button("Continue", new Runnable() {
         @Override
         public void run() {
-            int PickedDE = comboBox.getSelectedIndex();
+            int pickedDE = comboBox.getSelectedIndex();
 
-
-            switch (PickedDE) {
-                case 0 -> installConfig.setDesktopEnvironment("--plasma");
+            switch (pickedDE) {
+                case 0 -> installConfig.setDesktopEnvironment("--kde"); // Matches script parameter expectation
                 case 1 -> installConfig.setDesktopEnvironment("--xfce");
                 case 2 -> installConfig.setDesktopEnvironment("--niri");
-                case 3 -> installConfig.setDesktopEnvironment("--tty");
+                case 3 -> installConfig.setDesktopEnvironment("--no-de");
                 default -> installConfig.setDesktopEnvironment("--xfce");
-            };
+            }
 
-            new KernelPage(window).show();
+            // Pass the single shared configuration state to the next step
+            new KernelPage(window, installConfig).show();
         }
     });
 
-    public DePage(BasicWindow window) {
+    // Update constructor to accept the configuration
+    public DePage(BasicWindow window, InstallConfig installConfig) {
         this.window = window;
+        this.installConfig = installConfig;
         this.panel = new Panel(new LinearLayout(Direction.VERTICAL));
     }
 

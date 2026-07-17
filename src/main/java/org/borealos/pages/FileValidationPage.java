@@ -3,6 +3,7 @@ package org.borealos.pages;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
+import org.borealos.val.InstallConfig; // Don't forget the import!
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ public class FileValidationPage {
 
     private final BasicWindow window;
     private final Panel panel;
+    private final InstallConfig installConfig; // Field to hold the configuration state
     private final Button button = new Button("Validate", new Runnable() {
         @Override
         public void run() {
@@ -26,7 +28,8 @@ public class FileValidationPage {
                         "RootFS is valid.",
                         MessageDialogButton.OK);
                 if (result == MessageDialogButton.OK) {
-                    PkgInstPage pkgInstPage = new PkgInstPage(window);
+                    // FIXED: Pass the shared installConfig along to PkgInstPage
+                    PkgInstPage pkgInstPage = new PkgInstPage(window, installConfig);
                     pkgInstPage.show();
                 }
 
@@ -36,8 +39,10 @@ public class FileValidationPage {
         }
     });
 
-    public FileValidationPage(BasicWindow window) {
+    // FIXED: Accept InstallConfig in the constructor
+    public FileValidationPage(BasicWindow window, InstallConfig installConfig) {
         this.window = window;
+        this.installConfig = installConfig;
         this.panel = new Panel();
     }
 
