@@ -1,6 +1,6 @@
 package org.borealos.subsys;
 
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI; // <-- Change this import
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.googlecode.lanterna.gui2.ProgressBar;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
