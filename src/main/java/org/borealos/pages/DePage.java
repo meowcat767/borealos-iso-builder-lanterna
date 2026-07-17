@@ -8,12 +8,12 @@ public class DePage {
     private final BasicWindow window;
     private final Panel panel;
     private final ComboBox comboBox = new ComboBox<String>();
+    private final InstallConfig installConfig = new InstallConfig();
     private final Button button = new Button("Continue", new Runnable() {
         @Override
         public void run() {
             int PickedDE = comboBox.getSelectedIndex();
 
-            InstallConfig installConfig = new InstallConfig();
 
             switch (PickedDE) {
                 case 0 -> installConfig.setDesktopEnvironment("--plasma");

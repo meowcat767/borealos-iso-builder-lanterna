@@ -1,6 +1,10 @@
 package org.borealos.subsys;
 
+import org.borealos.val.InstallConfig;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -8,9 +12,30 @@ import java.util.concurrent.Executors;
 public class BuildScriptDirector {
     private static final ExecutorService worker = Executors.newSingleThreadExecutor();
 
-    public static void FireScript(String flags) {
+    public static void FireScript(InstallConfig installConfig) {
         try {
             worker.submit(() -> {
+
+                List<String> command = new ArrayList<>();
+                command.add("bash");
+                command.add("./build.sh");
+                command.add(installConfig.getDesktopEnvironment());
+
+                if (installConfig.isInstallBash()) {
+                    command.add("--bash");
+                }
+
+                if (installConfig.isInstallFish()) {
+                    command.add("--fish");
+                }
+
+                if (installConfig.isInstallSh()) {
+                    command.add("--sh");
+                }
+
+                if (installConfig.isKernelLTS()) {
+                    command.add("--lts");
+                }
 
             });
         } catch (Exception e) {

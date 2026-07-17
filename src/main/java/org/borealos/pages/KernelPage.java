@@ -8,6 +8,7 @@ public class KernelPage {
     private final BasicWindow window;
     private final Panel panel;
     private final ComboBox comboBox = new ComboBox<String>();
+    private final InstallConfig installConfig = new InstallConfig();
     private final Button button = new Button("Continue", new Runnable() {
         @Override
         public void run() {
@@ -18,13 +19,12 @@ public class KernelPage {
                 // even though we have default, it isn't the best option incase of a failed return.
             }
 
-            InstallConfig installConfig = new InstallConfig();
 
             switch (selectedKernel) {
                 case 0 -> installConfig.setKernelLTS(true);
                 case 1 -> installConfig.setKernelStd(true);
                 default -> installConfig.setKernelLTS(true);
-            };
+            }
 
         }
     });

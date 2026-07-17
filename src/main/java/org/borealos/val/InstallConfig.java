@@ -33,4 +33,29 @@ public class InstallConfig {
     public void setKernelStd(boolean kernelStd) {
         this.kernelStd = kernelStd;
     }
+
+    public String getDesktopEnvironment() {
+        return desktopEnvironment;
+    }
+
+    public boolean isInstallBash() {
+        return installBash;
+    }
+
+    public boolean isInstallFish() {
+        return installFish;
+    }
+
+    public boolean isInstallSh() {
+        return installSh;
+    }
+
+    public boolean isKernelLTS() {
+        return kernelLTS;
+    }
+
+    public boolean isKernelStd() {
+        return kernelStd;
+    }
+
 }
