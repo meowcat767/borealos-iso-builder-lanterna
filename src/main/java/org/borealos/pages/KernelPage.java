@@ -2,6 +2,7 @@ package org.borealos.pages;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import org.borealos.val.InstallConfig;
 
 public class KernelPage {
     private final BasicWindow window;
@@ -15,15 +16,16 @@ public class KernelPage {
             if (selectedKernel == -1) {
                 MessageDialog.showMessageDialog(window.getTextGUI(), "Error", "Please select a kernel.");
                 // even though we have default, it isn't the best option incase of a failed return.
-
             }
-            String KernelFlag = switch (selectedKernel) {
-                case 0 -> "--current-kernel";
-                case 1 -> "--lts-kernel";
-                default -> "--current-kernel";
+
+            InstallConfig installConfig = new InstallConfig();
+
+            switch (selectedKernel) {
+                case 0 -> installConfig.setKernelLTS(true);
+                case 1 -> installConfig.setKernelStd(true);
+                default -> installConfig.setKernelLTS(true);
             };
 
-            System.out.println(KernelFlag);
         }
     });
 
