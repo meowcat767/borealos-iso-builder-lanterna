@@ -3,6 +3,7 @@ package org.borealos.pages;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.screen.Screen;
 
+import org.borealos.val.InstallConfig;
 
 public class ShellPage {
     private final BasicWindow window;
@@ -12,12 +13,13 @@ public class ShellPage {
         @Override
         public void run() {
             int PickedShell = comboBox.getSelectedIndex();
+            InstallConfig installConfig = new InstallConfig();
 
-            String ShFlag = switch (PickedShell) {
-                case 0 -> "--bash";
-                case 1 -> "--fish";
-                case 2 -> "--sh";
-                default -> "--bash";
+            switch (PickedShell) {
+                case 0 -> installConfig.setInstallBash(true);
+                case 1 -> installConfig.setInstallFish(true);
+                case 2 -> installConfig.setInstallSh(true);
+                default -> installConfig.setInstallBash(true);
             };
 
             new KernelPage(window).show();
