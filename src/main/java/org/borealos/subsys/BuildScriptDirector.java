@@ -37,9 +37,14 @@ public class BuildScriptDirector {
                     command.add("--lts");
                 }
 
+                try {
+                    runCommand(command.toArray(new String[0]));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+           throw new RuntimeException(e);
         }
     }
 
@@ -51,7 +56,6 @@ public class BuildScriptDirector {
         String[] finalCommand = command;
         boolean useSudoS = command.length > 0 && "sudo".equals(command[0]);
         if (useSudoS) {
-            // Insert -S after sudo
             String[] newCmd = new String[command.length + 1];
             newCmd[0] = "sudo";
             newCmd[1] = "-S";
